@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>AI Evil Friend</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@10.7.2/lib/languages/python.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/a11y-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <style>
+    body {
+      background-color: #f1f1f1;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+  
+    .container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .chat-box {
+      background-color: #fff;
+      width: 100%;
+      max-width: 600px;
+      height: 80vh;
+      max-height: 600px;
+      overflow-y: scroll;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+    }
+  
+    .message {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 15px;
+    }
+  
+    .user-message {
+      background-color: #007bff;
+      color: #fff;
+      align-self: flex-end;
+      padding: 10px 15px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      max-width: 70%;
+      word-wrap: break-word;
+      line-height: 1.4;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      margin-left: auto;
+      position: relative;
+    }
+  
+    .user-message::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -10px;
+      border-style: solid;
+      border-width: 10px 10px 10px 0;
+      border-color: transparent #007bff transparent transparent;
+    }
+  
+    .bot-message {
+      background-color: #f5f5f5;
+      color: #000;
+      align-self: flex-start;
+      padding: 8px 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      max-width: 70%; /* Limit the width of the bot message */
+      word-wrap: break-word; /* Wrap long words */
+      line-height: 1.4; /* Adjust line height for better readability */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+  
+    .form-group {
+      display: flex;
+      margin-top: 20px;
+    }
+  
+    textarea {
+      flex-grow: 1;
+      resize: none;
+      border-radius: 5px;
+      border: none;
+      padding: 10px;
+    }
+  
+    .btn-primary {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+  
+    .banner {
+      background-color: #007bff;
+      color: #fff;
+      font-size: 18px;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      margin-bottom: 10px;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+  
+    /* Typing Animation */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #007bff;
+      margin-right: 4px;
+      animation-name: typing;
+      animation-duration: 1s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+  
+    @keyframes typing {
+      0% {
+        opacity: 0.5;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0.5;
+      }
+    }
+  
+    /* User Icon */
+    .user-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+  
+    /* Bot Icon */
+    .bot-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+  
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  
+    h1 {
+      animation: fadeIn 1s ease-in-out;
+      color: #007bff;
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+  
+    /* Responsive Styles */
+    @media screen and (max-width: 768px) {
+      .chat-box {
+        height: 60vh;
+      }
+  
+      .user-message,
+      .bot-message {
+        font-size: 12px;
+        max-width: 80%;
+      }
+  
+      .form-group {
+        flex-direction: column;
+      }
+  
+      textarea {
+        margin-top: 10px;
+      }
+  
+      .banner {
+        font-size: 14px;
+        padding: 8px;
+      }
+  
+      h1 {
+        font-size: 3vw;
+      }
+    }
+  </style>
+  
+  
+</head>
+
+<body>
+  <div class="container mt-5">
+   <h1 style="color:black">Otaku_question_Solver_BY_GutssTheLoner</h1>
+    <div class="banner">You can ask only 3 questions per minute</div> <!-- Add the banner text here -->
+    <div class="chat-box mt-3">
+      <!-- Chat messages will be added here dynamically -->
+    </div>
+    <div class="form-group mt-3">
+      <textarea class="form-control" rows="3" placeholder="Type your Question or Doubt here" id="message-input"></textarea>
+    </div>
+    <button type="button" class="btn btn-primary" id="send-btn">Send</button>
+  </div>
+
+  <script>
+    setInterval(highlightAll, 1000);
+
+    // Function to highlight code using highlight.js library
+    function highlightAll() {
+      document.querySelectorAll("pre code").forEach(block => {
+        hljs.highlightBlock(block);
+      });
+    }
+
+    const chatBox = document.querySelector(".chat-box");
+    const messageInput = document.querySelector("#message-input");
+    const sendBtn = document.querySelector("#send-btn");
+
+    function addMessage(message, isUserMessage) {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add("mt-3", "p-3", "rounded");
+
+      if (isUserMessage) {
+        messageDiv.classList.add("user-message");
+        messageDiv.innerHTML = `
+          <img src="{{ url_for('static', filename='images/user.png') }}" class="user-icon">
+          <p>${message}</p>
+        `;
+      } else {
+        messageDiv.classList.add("bot-message");
+        messageDiv.innerHTML = `
+          <img src="{{ url_for('static', filename='images/gpt.jpg') }}" class="bot-icon">
+          <p>${message}</p>
+        `;
+      }
+
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showThinking() {
+      const typingIndicator = document.createElement("div");
+      typingIndicator.classList.add("typing-indicator");
+
+      for (let i = 0; i < 3; i++) {
+        const span = document.createElement("span");
+        typingIndicator.appendChild(span);
+      }
+
+      chatBox.appendChild(typingIndicator);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeThinking() {
+      const typingIndicator = document.querySelector(".typing-indicator");
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+
+    function sendMessage() {
+      const message = messageInput.value.trim();
+
+      if (message !== "") {
+        addMessage(message, true);
+        showThinking();
+
+        fetch("/api", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        })
+          .then(response => response.json())
+          .then(data => {
+            messageInput.value = "";
+            removeThinking();
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("mt-3", "p-3", "rounded");
+            messageDiv.classList.add("bot-message");
+
+            const content = data.content;
+
+            // Check if the content has code block
+            const hasCodeBlock = content.includes("```");
+            if (hasCodeBlock) {
+              // If the content has code block, wrap it in a <pre><code> element
+              const codeContent = content.replace(/```([\s\S]+?)```/g, '</p><pre><code>$1</code></pre><p>');
+
+              messageDiv.innerHTML = `<img src="{{ url_for('static', filename='images/gpt.jpg') }}" class="bot-icon"><p>${codeContent}</p>`;
+            } else {
+              messageDiv.innerHTML = `<img src="{{ url_for('static', filename='images/gpt.jpg') }}" class="bot-icon"><p>${content}</p>`;
+            }
+
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+          })
+          .catch(error => console.error(error));
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keydown", event => {
+      if (event.keyCode === 13 && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+
+</html>
